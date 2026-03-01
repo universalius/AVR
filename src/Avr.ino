@@ -17,19 +17,32 @@ int pos = 0; // variable to store the servo position
 int servoPin = 21;
 int gridPowerPin = 22;
 int invertorPowerPin = 23;
+int mainOutputLedPin = 19;
 
 int powerOnDelay = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 int angles[3] = {0, 45, 80};
 
 int angleIndex = 0;
+int gridAngleIndex = 0;
+int neutralAngleIndex = 1;
+int invertorAngleIndex = 2;
 
+bool isAvrStarted = false;
 bool isEmergency = false;
+bool mainOutputPowerOn = false;
+
+unsigned long processAvrPrevMillis = 0; // Store the last time the LED was toggled
+unsigned long esp32PowerOnMillis = millis();
+
+const long interval = 1000; // Interval at which to toggle the LED (1 second)
 
 void setup()
 {
   Serial.begin(115200); // make sure your Serial Monitor is also set at this baud rate.
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+
+  pinMode(mainOutputLedPin, OUTPUT);
 
   // Allow allocation of all timers
   ESP32PWM::allocateTimer(0);
@@ -47,13 +60,20 @@ void setup()
 
   button.attachClick(handleButtonClick, &button);
   button.attachDoubleClick(handleButtonDoubleClick, &button);
+  button.attachLongPressStop(handleButtonLongPressStop, &button);
 
   button.setLongPressIntervalMs(2000);
+
+  moveSwitcherToAngle(neutralAngleIndex);
 }
 
 void loop()
 {
   button.tick();
+
+  processAvrTask();
+
+  processIdleTask();
 
   // if (digitalRead(PIN_BUTTON) == LOW)
   // {
@@ -84,6 +104,78 @@ void loop()
   //  myservo.write(80); // Move to 0 degrees
   //  delay(5000);
   //  test1();
+}
+
+void processAvrTask(bool withDelay = false)
+{
+  if (!isAvrStarted)
+  {
+    return;
+  }
+
+  unsigned long currentMillis = millis();
+  if (currentMillis - processAvrPrevMillis >= interval)
+  {
+    processAvrPrevMillis = currentMillis;
+
+    if (isEmergency)
+    {
+      return;
+    }
+
+    if (!mainOutputPowerOn)
+    {
+      if (isGridPowerOn())
+      {
+        switchOnMainOutput(gridAngleIndex, withDelay);
+        return;
+      }
+
+      if (isInvertorPowerOn())
+      {
+        switchOnMainOutput(invertorAngleIndex, withDelay);
+        return;
+      }
+    }
+    else
+    {
+      if (!isGridPowerOn() && angleIndex == gridAngleIndex)
+      {
+        switchOnMainOutput(invertorAngleIndex, true);
+        return;
+      }
+
+      if (!isInvertorPowerOn() && angleIndex == invertorAngleIndex)
+      {
+        switchOnMainOutput(gridAngleIndex, true);
+        return;
+      }
+    }
+  }
+}
+
+void processIdleTask()
+{
+  unsigned long currentMillis = millis();
+  if (currentMillis - esp32PowerOnMillis >= powerOnDelay)
+  {
+    if (!isAvrStarted)
+    {
+      isAvrStarted = true;
+    }
+  }
+}
+
+void switchOnMainOutput(int index, bool withDelay = false)
+{
+  if (withDelay)
+  {
+    delay(powerOnDelay);
+  }
+
+  moveSwitcherToAngle(index);
+  mainOutputPowerOn = true;
+  digitalWrite(mainOutputLedPin, HIGH);
 }
 
 bool checkForEmergency()
@@ -125,7 +217,7 @@ void handleButtonClick(void *oneButton)
   angleIndex++;
   if (angleIndex >= 3)
   {
-    angleIndex = 0;
+    angleIndex = gridAngleIndex;
   }
 }
 
@@ -138,6 +230,19 @@ void handleButtonDoubleClick(void *oneButton)
   {
     isEmergency = true;
   }
+}
+
+void handleButtonLongPressStop(void *oneButton)
+{
+  Serial.print(((OneButton *)oneButton)->getPressedMs());
+  Serial.println("\t - handleButtonLongPressStop()");
+
+  if (isEmergency)
+  {
+    return;
+  }
+
+  isAvrStarted = true;
 }
 
 bool isGridPowerOn()

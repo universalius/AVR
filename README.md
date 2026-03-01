@@ -40,7 +40,7 @@ Can be usefull https://community.platformio.org/t/cannot-run-builtin-debugger-on
 
 Reuirements
 1. When power is on move switcher to neutral position 0
-    - wait for 5 mins if analog signal on power invertor pin is absent enable default avr process
+    - wait for 5 mins if analog signal on power invertor or grid pin is absent enable default avr process
 2. Long press on button to activate default avr process
     - look on pin for analog signal - grid power. If has some signal more then 1V then set swither to pisition 1.
     - look on pin for analog signal - invertor. If has some signal more then 1V then set swither to pisition 2. 
