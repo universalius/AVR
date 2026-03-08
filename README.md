@@ -38,7 +38,7 @@ debug_init_break = tbreak setup
 ```
 Can be usefull https://community.platformio.org/t/cannot-run-builtin-debugger-on-esp32-s3-board/36384/4
 
-Reuirements
+Requirements
 1. When power is on move switcher to neutral position 0
     - wait for 5 mins if analog signal on power invertor or grid pin is absent enable default avr process
 2. Long press on button to activate default avr process
