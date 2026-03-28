@@ -6,15 +6,15 @@
 #include <ESP32Servo.h>
 #include "OneButton.h"
 
-#define PIN_BUTTON 4
-int servoPin = 2;
-int gridPowerPin = 19;
-int invertorPowerPin = 20;
-int mainOutputLedPin = 10;
+#define PIN_BUTTON 2
+int servoPin = 4;
+int gridPowerPin = 5;
+int invertorPowerPin = 6;
+int mainOutputLedPin = 8;
 
 int pos = 0; // variable to store the servo position
 
-int powerOnDelay = 1 * 60 * 1000; // 5 minutes in milliseconds
+int powerOnDelay = 1 * 20 * 1000; // 5 minutes in milliseconds
 
 int angles[3] = {0, 45, 80};
 
@@ -185,6 +185,14 @@ void moveSwitcherToAngle(int index)
   Log.infoln("Moved switcher to angle: %d", angles[index]);
 }
 
+void blinkMainOutputLed(int delayTime)
+{
+  digitalWrite(mainOutputLedPin, HIGH); // Turn the LED on
+  delay(delayTime);                     // Wait for the specified delay time
+  digitalWrite(mainOutputLedPin, LOW);  // Turn the LED off
+  delay(delayTime);                     // Wait for the specified delay time
+}
+
 void test()
 {
   for (pos = 0; pos <= 180; pos += 10)
@@ -269,7 +277,7 @@ void processIdleTask()
   unsigned long currentMillis = millis();
   if (currentMillis - esp32PowerOnMillis >= powerOnDelay)
   {
-    if (!isAvrStarted)
+    if (!isEmergency && !isAvrStarted)
     {
       Log.infoln("ESP32 has been powered on for %d minutes. Starting AVR process.", powerOnDelay / 60000);
       isAvrStarted = true;
@@ -279,6 +287,11 @@ void processIdleTask()
 
 void loop()
 {
+  if (isEmergency)
+  {
+    blinkMainOutputLed(500);
+  }
+
   button.tick();
 
   processAvrTask();

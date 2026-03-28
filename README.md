@@ -48,3 +48,7 @@ Requirements
 4. Double button click launch test process.
     - move switcher for each position 1 -> 0 -> 2 and check if analog signals are present on both inputs
     - if analog signals present on both inputs it means emergency. Block all actions till power reset.
+
+Links
+https://www.nologo.tech/product/esp32/esp32s3/esp32s3supermini/esp32S3SuperMini.html#%E5%B0%BA%E5%AF%B8%E5%9B%BE
+https://github.com/UnsignedArduino/ESP32-S3-Super-Mini-Test
