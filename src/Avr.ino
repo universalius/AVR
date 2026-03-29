@@ -6,15 +6,16 @@
 #include <ESP32Servo.h>
 #include "OneButton.h"
 
-#define PIN_BUTTON 2
-int servoPin = 4;
-int gridPowerPin = 5;
-int invertorPowerPin = 6;
+#define PIN_BUTTON 3
+int servoPin = 5;
+int gridPowerPin = 6;
+int invertorPowerPin = 7;
 int mainOutputLedPin = 8;
 
 int pos = 0; // variable to store the servo position
 
-int powerOnDelay = 1 * 20 * 1000; // 5 minutes in milliseconds
+int powerOnDelay = 1 * 30 * 1000; // 5 minutes in milliseconds
+int idleDelay = 2 * 60 * 1000;    // 1 minute in milliseconds
 
 int angles[3] = {0, 45, 80};
 
@@ -275,7 +276,7 @@ void processAvrTask(bool withDelay = false)
 void processIdleTask()
 {
   unsigned long currentMillis = millis();
-  if (currentMillis - esp32PowerOnMillis >= powerOnDelay)
+  if (currentMillis - esp32PowerOnMillis >= idleDelay)
   {
     if (!isEmergency && !isAvrStarted)
     {
