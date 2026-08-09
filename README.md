@@ -1,54 +1,35 @@
-How to build PlatformIO based project
-=====================================
+# AVR ESP32 S3 Project
 
-1. [Install PlatformIO Core](https://docs.platformio.org/page/core.html)
-2. Download [development platform with examples](https://github.com/platformio/platform-espressif32/archive/develop.zip)
-3. Extract ZIP archive
-4. Run these commands:
+This project uses `pioarduino`.
 
-```shell
-# Change directory to example
-$ cd platform-espressif32/examples/arduino-wifiscan
+## Usage
+- Build and upload with PlatformIO using the `pioarduino` environment.
+- Open `platformio.ini` to confirm board and upload settings.
 
-# Build project
-$ pio run
+## Debugging ESP32 S3
+1. Connect to a USB port that supports JTAG debug.
+2. Download Zadig from: https://zadig.akeo.ie/downloads/#google_vignette
+3. Open Zadig and enable `Options -> List All Devices`.
+4. Select `USB JTAG/serial debug unit (Interface 2)`.
+5. Install the `libusbK` driver.
+6. Add the following to `platformio.ini`:
 
-# Upload firmware
-$ pio run --target upload
-
-# Build specific environment
-$ pio run -e quantum
-
-# Upload firmware for the specific environment
-$ pio run -e quantum --target upload
-
-# Clean build files
-$ pio run --target clean
-```
-
-How to debug ESP32 S3
-1. Connect to usb port that supports JTAG debug
-2. Download tool from https://zadig.akeo.ie/downloads/#google_vignette
-3. Open it, click Options -> List All Devices -> Select USB JTAG/serial debug unit (Interface 2)
-4. Change driver to libusbK with arrows and click install button.
-5. Add to platformio.ini
-```
+```ini
 debug_tool = esp-builtin
 debug_init_break = tbreak setup
 ```
-Can be usefull https://community.platformio.org/t/cannot-run-builtin-debugger-on-esp32-s3-board/36384/4
 
-Requirements
+## Requirements
 1. When power is on move switcher to neutral position 0
-    - wait for 5 mins if analog signal on power invertor or grid pin is absent enable default avr process
+    - wait for 5 mins if power invertor or grid input is false enable default avr process
 2. Long press on button to activate default avr process
-    - look on pin for analog signal - grid power. If has some signal more then 1V then set swither to pisition 1.
-    - look on pin for analog signal - invertor. If has some signal more then 1V then set swither to pisition 2. 
+    - look on pin - grid power. If false set swither to pisition 1.
+    - look on pin - invertor. If false then set swither to pisition 2. 
 3. Single button click moves switcher for next position.  1 -> 0 -> 2 . Works only when power first on.
 4. Double button click launch test process.
-    - move switcher for each position 1 -> 0 -> 2 and check if analog signals are present on both inputs
-    - if analog signals present on both inputs it means emergency. Block all actions till power reset.
+    - move switcher for each position 1 -> 0 -> 2 and check both inputs
+    - if false present on both inputs it means emergency. Block all actions till power reset.
 
-Links
-https://www.nologo.tech/product/esp32/esp32s3/esp32s3supermini/esp32S3SuperMini.html#%E5%B0%BA%E5%AF%B8%E5%9B%BE
-https://github.com/UnsignedArduino/ESP32-S3-Super-Mini-Test
+## Links
+- https://www.nologo.tech/product/esp32/esp32s3/esp32s3supermini/esp32S3SuperMini.html
+- https://github.com/UnsignedArduino/ESP32-S3-Super-Mini-Test

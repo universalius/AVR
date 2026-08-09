@@ -8,8 +8,8 @@
 
 #define PIN_BUTTON 3
 int servoPin = 5;
-int gridPowerPin = 6;
-int invertorPowerPin = 7;
+int gridPowerPin = 6;       // input with external pullup resistor
+int invertorPowerPin = 9;   // input with external pullup resistor
 int mainOutputLedPin = 8;
 
 int pos = 0; // variable to store the servo position
@@ -43,6 +43,8 @@ void setup()
   Serial.begin(115200); // make sure your Serial Monitor is also set at this baud rate.
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
 
+  pinMode(gridPowerPin, INPUT);     // external pullup resistor
+  pinMode(invertorPowerPin, INPUT); // external pullup resistor
   pinMode(mainOutputLedPin, OUTPUT);
 
   // Allow allocation of all timers
@@ -156,25 +158,16 @@ void handleButtonLongPressStop(void *oneButton)
 
 bool isGridPowerOn()
 {
-  double voltage = getVoltage(gridPowerPin);
-  Log.infoln("Grid power voltage: %D V", voltage);
-  return voltage > 1.0; // Assuming a threshold of 1.0V to determine if grid power is on
+  bool powerOn = digitalRead(gridPowerPin) == LOW; // Assuming LOW means power is on due to external pullup
+  Log.infoln("Grid power is %s", powerOn ? "ON" : "OFF");
+  return powerOn;
 }
 
 bool isInvertorPowerOn()
 {
-  double voltage = getVoltage(invertorPowerPin);
-  Log.infoln("Inverter power voltage: %D V", voltage);
-  return voltage > 1.0; // Assuming a threshold of 1.0V to determine if inverter power is on
-}
-
-double getVoltage(int pin)
-{
-  // Read analog value
-  int potValue = analogRead(pin);
-  // Convert to voltage: (potValue / 4095.0) * 3.3V
-  double voltage = (potValue / 4095.0) * 3.3;
-  return voltage;
+  bool powerOn = digitalRead(invertorPowerPin) == LOW; // Assuming LOW means power is on due to external pullup
+  Log.infoln("Inverter power is %s", powerOn ? "ON" : "OFF");
+  return powerOn;
 }
 
 void moveSwitcherToAngle(int index)
