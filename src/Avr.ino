@@ -9,7 +9,7 @@
 #define PIN_BUTTON 3
 int servoPin = 5;
 int gridPowerPin = 6;       // input with external pullup resistor
-int invertorPowerPin = 9;   // input with external pullup resistor
+int invertorPowerPin = 10;  // input with external pullup resistor
 int mainOutputLedPin = 8;
 
 int pos = 0; // variable to store the servo position
@@ -103,12 +103,16 @@ bool checkForEmergency()
       {
         moveSwitcherToAngle(prevIndex);
       }
+      else
+      {
+        moveSwitcherToAngle(neutralAngleIndex);
+      }
 
       return true;
     }
   }
 
-  moveSwitcherToAngle(1);
+  moveSwitcherToAngle(neutralAngleIndex);
 
   return false;
 }
