@@ -17,7 +17,7 @@ int pos = 0; // variable to store the servo position
 int powerOnDelay = 1 * 30 * 1000; // 5 minutes in milliseconds
 int idleDelay = 2 * 60 * 1000;    // 1 minute in milliseconds
 
-int angles[3] = {0, 45, 80};
+int angles[3] = {80, 45, 0}; // Angles for grid, neutral, and inverter positions
 
 int angleIndex = 0;
 int gridAngleIndex = 0;
